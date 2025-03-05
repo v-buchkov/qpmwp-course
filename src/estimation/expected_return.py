@@ -33,10 +33,10 @@ import pandas as pd
 
 
 class ExpectedReturnSpecification(dict):
-
+    """Extend it to use more modifications"""
     def __init__(self,
                  method='geometric',
-                 scalefactor=1,
+                 scalefactor=1, # scale to annualize
                  **kwargs):
         super().__init__(
             method=method,
@@ -117,7 +117,7 @@ class ExpectedReturn:
 def mean_geometric(X: Union[pd.DataFrame, np.ndarray],
                    scalefactor: Union[float, int] = 1) -> Union[pd.Series, np.ndarray]:
 
-    mu = np.exp(np.log(1 + X).mean(axis=0) * scalefactor) - 1
+    mu = np.exp(np.log(1 + X).mean(axis=0) * scalefactor) - 1 # Output is discrete again
     return mu
 
 def mean_arithmetic(X: Union[pd.DataFrame, np.ndarray],

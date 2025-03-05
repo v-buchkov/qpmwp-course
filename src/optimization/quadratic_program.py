@@ -23,10 +23,12 @@ import scipy.sparse as spa
 
 
 ALL_SOLVERS = {'clarabel', 'cvxopt', 'daqp', 'ecos', 'gurobi', 'highs', 'mosek', 'osqp', 'piqp', 'proxqp', 'qpalm', 'quadprog', 'scs'}
+
+# Require to transform the variance-covariance matrix into the sparse format
 SPARSE_SOLVERS = {'clarabel', 'ecos', 'gurobi', 'mosek', 'highs', 'qpalm', 'osqp', 'qpswift', 'scs'}
 IGNORED_SOLVERS = {
-    'gurobi',  # Commercial solver
-    'mosek',  # Commercial solver
+    'gurobi',  # (!) Commercial solver - might be useful in practice
+    'mosek',  # (!) Commercial solver - might be useful in practice
     'ecos',
     'scs',
     'piqp',

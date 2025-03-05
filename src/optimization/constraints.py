@@ -22,13 +22,14 @@ import pandas as pd
 
 
 class Constraints:
-
+    """params: list of identifiers - e.g., isocodes for the country ETFs"""
     def __init__(self, ids: list[str] = ['NA']):
         self.ids = ids
-        self.budget = {'Amat': None, 'sense': None, 'rhs': None}
+        self.budget = {'Amat': None, 'sense': None, 'rhs': None} # i.e., sum of weights = 1, 'sense' -> =, < etc.,
+        # 'rhs' any < const
         self.box = {'box_type': 'NA', 'lower': None, 'upper': None}
         self.linear = {'G': None, 'sense': None, 'rhs': None}
-        self.l1 = {}
+        self.l1 = {} # like L1-norm => absolute-value transform - needed for transaction costs constraints
 
     @property
     def ids(self):
@@ -146,6 +147,8 @@ class Constraints:
         return None
 
     def to_GhAb(self, lbub_to_G: bool = False) -> dict[str, pd.DataFrame]:
+        """Transform into the mathematical definition from the slides"""
+
         A = None
         b = None
         G = None

@@ -19,12 +19,12 @@ import numpy as np
 import pandas as pd
 
 # Local modules
-from helper_functions import to_numpy
-from estimation.covariance import Covariance
-from estimation.expected_return import ExpectedReturn
-from optimization.optimization_data import OptimizationData
-from optimization.constraints import Constraints
-from optimization.quadratic_program import QuadraticProgram
+from src.helper_functions import to_numpy
+from src.estimation.covariance import Covariance
+from src.estimation.expected_return import ExpectedReturn
+from src.optimization.optimization_data import OptimizationData
+from src.optimization.constraints import Constraints
+from src.optimization.quadratic_program import QuadraticProgram
 
 
 
@@ -184,6 +184,7 @@ class Optimization(ABC):
 
 
 class LeastSquares(Optimization):
+    """Useful for findning the weights of index tracking."""
 
     def __init__(self,
                  constraints: Optional[Constraints] = None,
@@ -241,11 +242,12 @@ class MeanVariance(Optimization):
         self.expected_return = ExpectedReturn() if expected_return is None else expected_return
 
     def set_objective(self, optimization_data: OptimizationData) -> None:
+        """From the data computes the covariance matrix and the expected return vector."""
         X = optimization_data['return_series']
         covmat = self.covariance.estimate(X=X, inplace=False)
         mu = self.expected_return.estimate(X=X, inplace=False)
         self.objective = Objective(
-            q = mu * -1,
+            q = mu * -1, # MinVar => could multiply by zero theoretically
             P = covmat * 2 * self.params['risk_aversion'],
         )
         return None

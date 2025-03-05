@@ -114,6 +114,7 @@ class Covariance:
                 'Estimation method not recognized.'
             )
 
+        # Check that the cov is positive definite and substitute with the nearest positive-definite
         # if self.spec.get('check_positive_definite'):
         #     if not isPD(covmat):
         #         covmat = nearestPD(covmat)
