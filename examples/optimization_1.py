@@ -113,6 +113,11 @@ h = np.array([0.5, 0.5])
 
 G, h
 
+print(G)
+print(h)
+print(A)
+print(b)
+
 
 
 
