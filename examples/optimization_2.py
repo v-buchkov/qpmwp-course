@@ -9,11 +9,8 @@
 # --------------------------------------------------------------------------
 
 
-
 # %reload_ext autoreload
 # %autoreload 2
-
-
 
 
 # Standard library imports
@@ -26,7 +23,7 @@ import pandas as pd
 
 # Add the project root directory to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-src_path = os.path.join(project_root, 'src')
+src_path = os.path.join(project_root, "src")
 sys.path.append(project_root)
 sys.path.append(src_path)
 
@@ -40,45 +37,34 @@ from src.optimization.optimization_data import OptimizationData
 from src.optimization.optimization import MeanVariance
 
 
-
-
-
-
-
 # --------------------------------------------------------------------------
 # Load data
 # --------------------------------------------------------------------------
 
 N = 10
-data = load_data_msci(path = '../data/', n = N)
+data = load_data_msci(path="../data/", n=N)
 # Discrete returns (!), not log-returns
 data
-
-
-
 
 
 # --------------------------------------------------------------------------
 # Estimates of the expected returns and covariance matrix
 # --------------------------------------------------------------------------
 
-X = data['return_series']
+X = data["return_series"]
 scalefactor = 1  # could be set to 252 (trading days) for annualized returns
 
 
 # 'geometric' => geometric mean
-expected_return = ExpectedReturn(method='geometric', scalefactor=scalefactor)
+expected_return = ExpectedReturn(method="geometric", scalefactor=scalefactor)
 expected_return.estimate(X=X, inplace=True)
 # Or:
 mu = expected_return.estimate(X=X, inplace=False)
 
-covariance = Covariance(method='pearson')
+covariance = Covariance(method="pearson")
 covariance.estimate(X=X, inplace=True)
 # Or:
 Sigma = covariance.estimate(X=X, inplace=False)
-
-
-
 
 
 # --------------------------------------------------------------------------
@@ -86,27 +72,29 @@ Sigma = covariance.estimate(X=X, inplace=False)
 # --------------------------------------------------------------------------
 
 # Instantiate the class
-constraints = Constraints(ids = X.columns.tolist())
+constraints = Constraints(ids=X.columns.tolist())
 
 # Add budget constraint
-constraints.add_budget(rhs=1, sense='=')
+constraints.add_budget(rhs=1, sense="=")
 
 # Add box constraints (i.e., lower and upper bounds)
-constraints.add_box(lower=0, upper=0.2) # Also could create a vector of constraints for individual
+constraints.add_box(
+    lower=0, upper=0.2
+)  # Also could create a vector of constraints for individual
 
 # Add linear constraints
 G = pd.DataFrame(np.zeros((2, N)), columns=constraints.ids)
 G.iloc[0, 0:5] = 1
 G.iloc[1, 6:10] = 1
-h = pd.Series([0.5, 0.5]) # Restrict sum(w) <= 50% for each of two groups (0:5 and 6:10)
-constraints.add_linear(G=G, sense='<=', rhs=h)
+h = pd.Series(
+    [0.5, 0.5]
+)  # Restrict sum(w) <= 50% for each of two groups (0:5 and 6:10)
+constraints.add_linear(G=G, sense="<=", rhs=h)
 
 
 constraints.budget
 constraints.box
 constraints.linear
-
-
 
 
 # --------------------------------------------------------------------------
@@ -123,15 +111,15 @@ risk_aversion = 3
 
 # Need to pass as np.array
 qp = QuadraticProgram(
-    P = covariance.matrix.to_numpy() * risk_aversion,
-    q = expected_return.vector.to_numpy() * -1, # As we minimize => -1 for mean return
-    G = GhAb['G'],
-    h = GhAb['h'],
-    A = GhAb['A'],
-    b = GhAb['b'],
-    lb = constraints.box['lower'].to_numpy(),
-    ub = constraints.box['upper'].to_numpy(),
-    solver = 'cvxopt'
+    P=covariance.matrix.to_numpy() * risk_aversion,
+    q=expected_return.vector.to_numpy() * -1,  # As we minimize => -1 for mean return
+    G=GhAb["G"],
+    h=GhAb["h"],
+    A=GhAb["A"],
+    b=GhAb["b"],
+    lb=constraints.box["lower"].to_numpy(),
+    ub=constraints.box["upper"].to_numpy(),
+    solver="cvxopt",
 )
 
 
@@ -142,7 +130,7 @@ qp.is_feasible()
 
 # All in-place and then attaches objects to the object
 qp.solve()
-solution = qp.results.get('solution')
+solution = qp.results.get("solution")
 solution
 
 solution.found
@@ -150,11 +138,6 @@ solution.primal_residual()
 solution.dual_residual()
 
 qp.objective_value()
-
-
-
-
-
 
 
 # --------------------------------------------------------------------------
@@ -168,7 +151,7 @@ mv = MeanVariance(
     expected_return=expected_return,
     constraints=constraints,
     risk_aversion=1,
-    solver_name='cvxopt',
+    solver_name="cvxopt",
 )
 
 mv.params
@@ -176,7 +159,9 @@ mv.params
 
 # Create an OptimizationData object that contains an element `return_series` holding
 # the last 256 observations (weekdays) of the return series
-optimization_data = OptimizationData(return_series=X.tail(256)) # Ensures that the dates are aligned
+optimization_data = OptimizationData(
+    return_series=X.tail(256)
+)  # Ensures that the dates are aligned
 
 # Set the objective function
 mv.set_objective(optimization_data=optimization_data)
@@ -187,14 +172,8 @@ mv.solve()
 mv.results
 
 # Extract the optimal weights
-weights_mv = pd.Series(mv.results['weights'], index=X.columns)
+weights_mv = pd.Series(mv.results["weights"], index=X.columns)
 weights_mv
-
-
-
-
-
-
 
 
 # --------------------------------------------------------------------------
@@ -209,27 +188,21 @@ from src.optimization.optimization import LeastSquares
 # Instantiate the optimization object
 ls = LeastSquares(
     constraints=constraints,
-    solver_name='cvxopt',
+    solver_name="cvxopt",
 )
 
 # Create an OptimizationData object that contains an element `return_series` holding
 # the last 256 observations (weekdays) of the return series as well as the benchmark
 # return series for the same period
-y = data['bm_series']
-optimization_data = OptimizationData(return_series=X.tail(256),
-                                     bm_series=y,
-                                     align=True)
+y = data["bm_series"]
+optimization_data = OptimizationData(return_series=X.tail(256), bm_series=y, align=True)
 
 # Set the objective and solve
 ls.set_objective(optimization_data=optimization_data)
 ls.solve()
 
-weights_ls = pd.Series(ls.results['weights'], index=X.columns)
+weights_ls = pd.Series(ls.results["weights"], index=X.columns)
 weights_ls
-
-
-
-
 
 
 # --------------------------------------------------------------------------
@@ -237,17 +210,11 @@ weights_ls
 # --------------------------------------------------------------------------
 
 
-weights_mat = pd.concat({
-    'mv': weights_mv,
-    'ls': weights_ls
-}, axis=1)
+weights_mat = pd.concat({"mv": weights_mv, "ls": weights_ls}, axis=1)
 
 
 sim = X @ weights_mat
-sim['benchmark'] = data['bm_series']
-sim.dropna(how='all', inplace=True)
+sim["benchmark"] = data["bm_series"]
+sim.dropna(how="all", inplace=True)
 
 np.log((1 + sim).cumprod()).plot()
-
-
-

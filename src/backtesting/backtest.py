@@ -9,7 +9,6 @@
 # --------------------------------------------------------------------------
 
 
-
 # Standard library imports
 import os
 from typing import Optional

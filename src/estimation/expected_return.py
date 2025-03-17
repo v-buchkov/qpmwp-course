@@ -17,8 +17,6 @@ import numpy as np
 import pandas as pd
 
 
-
-
 # TODO:
 
 # - Add a docstrings
@@ -28,16 +26,15 @@ import pandas as pd
 #       [ ] mean_ewma (exponential weighted)
 
 
-
-
-
-
 class ExpectedReturnSpecification(dict):
     """Extend it to use more modifications"""
-    def __init__(self,
-                 method='geometric',
-                 scalefactor=1, # scale to annualize
-                 **kwargs):
+
+    def __init__(
+        self,
+        method="geometric",
+        scalefactor=1,  # scale to annualize
+        **kwargs,
+    ):
         super().__init__(
             method=method,
             scalefactor=scalefactor,
@@ -46,10 +43,7 @@ class ExpectedReturnSpecification(dict):
 
 
 class ExpectedReturn:
-
-    def __init__(self,
-                 spec: Optional[ExpectedReturnSpecification] = None,
-                 **kwargs):
+    def __init__(self, spec: Optional[ExpectedReturnSpecification] = None, **kwargs):
         self.spec = ExpectedReturnSpecification() if spec is None else spec
         self.spec.update(kwargs)
         self._vector: Union[pd.Series, np.ndarray, None] = None
@@ -63,9 +57,7 @@ class ExpectedReturn:
         if isinstance(value, ExpectedReturnSpecification):
             self._spec = value
         else:
-            raise ValueError(
-                'Input value must be of type ExpectedReturnSpecification.'
-            )
+            raise ValueError("Input value must be of type ExpectedReturnSpecification.")
         return None
 
     @property
@@ -77,9 +69,7 @@ class ExpectedReturn:
         if isinstance(value, (pd.Series, np.ndarray)):
             self._vector = value
         else:
-            raise ValueError(
-                'Input value must be a pandas Series or a numpy array.'
-            )
+            raise ValueError("Input value must be a pandas Series or a numpy array.")
         return None
 
     def estimate(
@@ -87,18 +77,15 @@ class ExpectedReturn:
         X: Union[pd.DataFrame, np.ndarray],
         inplace: bool = True,
     ) -> Union[pd.Series, np.ndarray, None]:
+        scalefactor = self.spec.get("scalefactor", 1)
+        estimation_method = self.spec["method"]
 
-        scalefactor = self.spec.get('scalefactor', 1)
-        estimation_method = self.spec['method']
-
-        if estimation_method == 'geometric':
+        if estimation_method == "geometric":
             mu = mean_geometric(X=X, scalefactor=scalefactor)
-        elif estimation_method == 'arithmetic':
+        elif estimation_method == "arithmetic":
             mu = mean_arithmetic(X=X, scalefactor=scalefactor)
         else:
-            raise ValueError(
-                'Estimation method not recognized.'
-            )
+            raise ValueError("Estimation method not recognized.")
         if inplace:
             self.vector = mu
             return None
@@ -106,22 +93,22 @@ class ExpectedReturn:
             return mu
 
 
-
-
-
 # --------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------
 
 
-def mean_geometric(X: Union[pd.DataFrame, np.ndarray],
-                   scalefactor: Union[float, int] = 1) -> Union[pd.Series, np.ndarray]:
-
-    mu = np.exp(np.log(1 + X).mean(axis=0) * scalefactor) - 1 # Output is discrete again
+def mean_geometric(
+    X: Union[pd.DataFrame, np.ndarray], scalefactor: Union[float, int] = 1
+) -> Union[pd.Series, np.ndarray]:
+    mu = (
+        np.exp(np.log(1 + X).mean(axis=0) * scalefactor) - 1
+    )  # Output is discrete again
     return mu
 
-def mean_arithmetic(X: Union[pd.DataFrame, np.ndarray],
-                    scalefactor: Union[float, int] = 1) -> Union[pd.Series, np.ndarray]:
 
+def mean_arithmetic(
+    X: Union[pd.DataFrame, np.ndarray], scalefactor: Union[float, int] = 1
+) -> Union[pd.Series, np.ndarray]:
     mu = X.mean(axis=0) * scalefactor
     return mu

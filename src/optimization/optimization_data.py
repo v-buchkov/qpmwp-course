@@ -16,18 +16,16 @@ from typing import Optional
 import pandas as pd
 
 
-
-
 class OptimizationData(dict):
-    '''
-    A class to handle optimization data, 
+    """
+    A class to handle optimization data,
     allowing for alignment of dates and lagging of variables.
 
     Parameters:
     align (bool): Whether to align dates across all variables.
     lags (dict): Dictionary specifying the lag for each variable.
     kwargs: Additional keyword arguments to initialize the dictionary.
-    '''
+    """
 
     def __init__(self, align: bool = True, lags: dict = {}, **kwargs):
         super().__init__(**kwargs)
@@ -39,13 +37,13 @@ class OptimizationData(dict):
             self.align_dates()
 
     def align_dates(self, variable_names: Optional[list[str]] = None) -> None:
-        '''
+        """
         Align dates across specified variables.
 
         Parameters:
         variable_names (Optional[list[str]]): List of variable names to align.
         If None, align all variables.
-        '''
+        """
         if variable_names is None:
             variable_names = self.keys()
         index = self.intersecting_dates(variable_names=list(variable_names))
@@ -53,10 +51,10 @@ class OptimizationData(dict):
             self[key] = self[key].loc[index]
         return None
 
-    def intersecting_dates(self,
-                           variable_names: Optional[list[str]] = None,
-                           dropna: bool = True) -> pd.DatetimeIndex:
-        '''
+    def intersecting_dates(
+        self, variable_names: Optional[list[str]] = None, dropna: bool = True
+    ) -> pd.DatetimeIndex:
+        """
         Find intersecting dates across specified variables.
 
         Parameters:
@@ -66,7 +64,7 @@ class OptimizationData(dict):
 
         Returns:
         pd.DatetimeIndex: Intersecting dates.
-        '''
+        """
         if variable_names is None:
             variable_names = list(self.keys())
         if dropna:
