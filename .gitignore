@@ -170,3 +170,5 @@ cython_debug/
 # Data
 # Data/
 data/*
+
+assignments/assignment_2.ipynb
