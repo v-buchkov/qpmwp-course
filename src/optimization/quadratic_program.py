@@ -198,7 +198,7 @@ class QuadraticProgram:
             problem=problem,
             solver=self.solver_settings["solver"],
             initvals=self.solver_settings.get("x0"),
-            verbose=False,
+            verbose=True,
         )
         self.update_results({"solution": solution})
         return None
