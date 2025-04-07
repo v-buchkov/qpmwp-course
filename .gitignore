@@ -152,6 +152,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea
+.gitignore
 
 # pytype static type analyzer
 .pytype/
